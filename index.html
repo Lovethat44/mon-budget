@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Comptes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+		<header>
+			<button id="login-btn" class="btn-onedrive">
+			<i class="fab fa-microsoft"></i> Connexion OneDrive
+			</button>
+            <h1>Mon Compte</h1>
+            <div class="balance-card">
+                <div class="balance-item validated">
+                    <span class="label">Solde RÉEL Actuel (Validé)</span>
+                    <span class="amount" id="real-balance">0.00 €</span>
+                </div>
+
+                <div class="balance-item">
+                    <span class="label">Solde de Départ (Cumul Avant Mois)</span>
+                    <span class="amount" id="initial-balance">0.00 €</span>
+                </div>
+
+                <div class="balance-item pending">
+                    <span class="label">Solde ESTIMÉ (Réel + Attente)</span>
+                    <span class="amount" id="current-balance">0.00 €</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="sidebar-container">
+                
+                <section class="category-management sidebar">
+                    <h2>Gérer Catégories & Sous-catégories</h2>
+                    <ul id="category-management-list" class="management-list">
+                        <li style="text-align: center; color: var(--text-secondary);">Chargement...</li>
+                    </ul>
+                </section>
+                
+            </div>
+            
+            <div class="main-content">
+                
+                <section id="add-transaction">
+                    <h2>Nouvelle Transaction</h2>
+                    <form id="transaction-form" class="transaction-form">
+                        
+                        <div id="error-message" class="error-message" style="display: none;"></div>
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="transaction-date">Date</label>
+                                <input type="date" id="transaction-date" required>
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label for="transaction-description">Description</label>
+                                <input type="text" id="transaction-description" required list="descriptions-list">
+                                <datalist id="descriptions-list"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group category-group">
+                                <label for="transaction-category">Catégorie</label>
+                                <select id="transaction-category" required>
+                                    <option value="" disabled selected>-- Choisir Catégorie --</option>
+                                </select>
+                                <input type="text" id="new-category-name" placeholder="Nouvelle Catégorie (Entrée pour valider)" style="display: none;">
+                            </div>
+                            <div class="form-group subcategory-group">
+                                <label for="transaction-subcategory">Sous-catégorie</label>
+                                <select id="transaction-subcategory" required disabled>
+                                    <option value="">-- Choisir Sous-catégorie --</option>
+                                </select>
+                                <input type="text" id="new-subcategory-name" placeholder="Nouvelle Sous-catégorie (Entrée pour valider)" style="display: none;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transaction-amount">Montant (€)</label>
+                                <input type="number" id="transaction-amount" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transaction-type">Type</label>
+                                <select id="transaction-type" required>
+                                    <option value="debit">Dépense (-)</option>
+                                    <option value="credit">Revenu (+)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group recurrence-group">
+                            <label for="is-recurring">
+                                <input type="checkbox" id="is-recurring">
+                                Dépense récurrente ?
+                            </label>
+                            
+                            <select id="recurrence-type" disabled>
+                                <option value="">-- Fréquence --</option>
+                                <option value="monthly">Mensuelle</option>
+                                <option value="yearly">Annuelle</option>
+                            </select>
+
+                            </div>
+                        
+                        <button type="submit" class="btn-primary">Ajouter la Transaction</button>
+                    </form>
+                </section>
+                
+                <section class="transaction-list">
+                    <div class="list-header">
+                        <h2>Transactions</h2>
+                        <div class="filters">
+                            <button id="filter-all" class="active"><i class="fas fa-list"></i> Toutes</button>
+                            <button id="filter-pending"><i class="fas fa-hourglass-half"></i> En attente</button>
+                        </div>
+                    </div>
+
+                    <div class="month-selector">
+                        <button id="prev-month-btn" title="Mois précédent"><i class="fas fa-chevron-left"></i></button>
+                        <span id="month-year-display">Décembre 2025</span>
+                        <button id="next-month-btn" title="Mois suivant"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+
+                    <ul id="transaction-list">
+                    </ul>
+                </section>
+                
+                <section class="data-management-section">
+                    <button id="clear-data-btn" class="btn-danger" title="Supprime toutes les transactions et catégories">
+                        <i class="fas fa-trash-alt"></i> Vider les données
+                    </button>
+                    <button id="export-data-btn" class="btn-secondary" title="Télécharge les données dans un fichier">
+                        <i class="fas fa-download"></i> Exporter les données
+                    </button>
+                    <input type="file" id="import-data-input" accept=".json" style="display: none;">
+                    <button id="import-data-btn" class="btn-secondary" title="Charge les données à partir d'un fichier">
+                        <i class="fas fa-upload"></i> Importer les données
+                    </button>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+	<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
