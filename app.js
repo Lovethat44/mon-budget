@@ -1,4 +1,21 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+
+    // =========================================================================
+    // CONFIGURATION MICROSOFT ONEDRIVE (MSAL)
+    // =========================================================================
+    const msalConfig = {
+        auth: {
+            clientId: "TON_ID_CLIENT_ICI", // <--- REMPLACE PAR TON ID CLIENT AZURE
+            authority: "https://login.microsoftonline.com/common",
+            redirectUri: "https://lovethat44.github.io/mon-budget/",
+        },
+        cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+    };
+
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+    let accessToken = null;
+    const ONEDRIVE_FILE_NAME = "ma_sauvegarde_budget.json";
+    const ONEDRIVE_PATH = `https://graph.microsoft.com/v1.0/me/drive/root:/Apps/MonBudget/${ONEDRIVE_FILE_NAME}:/content`;
 
     // =========================================================================
     // 1. RÉFÉRENCES DOM
@@ -12,10 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const subcategorySelect = document.getElementById('transaction-subcategory');
     const newCategoryInput = document.getElementById('new-category-name');
     const newSubcategoryInput = document.getElementById('new-subcategory-name');
-
     const isRecurringCheckbox = document.getElementById('is-recurring');
     const recurrenceTypeSelect = document.getElementById('recurrence-type');
-
     const list = document.getElementById('transaction-list');
     const balanceDisplay = document.getElementById('current-balance');
     const realBalanceDisplay = document.getElementById('real-balance');
@@ -23,11 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthYearDisplay = document.getElementById('month-year-display');
     const prevMonthBtn = document.getElementById('prev-month-btn');
     const nextMonthBtn = document.getElementById('next-month-btn');
-    
     const categoryManagementList = document.getElementById('category-management-list');
-
     const filterAllBtn = document.getElementById('filter-all');
     const filterPendingBtn = document.getElementById('filter-pending');
+    const loginBtn = document.getElementById('login-btn');
 
     // =========================================================================
     // VARIABLES D'ÉTAT
@@ -43,37 +57,97 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = new Date();
     let filter = 'all';
     let editingTransactionId = null;
-    let fileHandle = null; // Pour la sauvegarde auto
+    let fileHandle = null; 
 
     // =========================================================================
-    // 2. FONCTIONS UTILITAIRES & SAUVEGARDE
+    // 2. FONCTIONS ONEDRIVE (API)
+    // =========================================================================
+
+    const updateLoginButtonUI = (isConnected) => {
+        if (!loginBtn) return;
+        if (isConnected) {
+            loginBtn.innerHTML = '<i class="fas fa-cloud"></i> Synchronisé';
+            loginBtn.style.backgroundColor = "#28a745";
+        } else {
+            loginBtn.innerHTML = '<i class="fab fa-microsoft"></i> Connexion OneDrive';
+            loginBtn.style.backgroundColor = "#0078d4";
+        }
+    };
+
+    const signIn = async () => {
+        try {
+            const loginRequest = { scopes: ["Files.ReadWrite", "User.Read"] };
+            const loginResponse = await msalInstance.loginPopup(loginRequest);
+            accessToken = loginResponse.accessToken;
+            console.log("Connecté à Microsoft Graph.");
+            updateLoginButtonUI(true);
+            await downloadFromOneDrive(); // Tenter de charger les données après connexion
+            return true;
+        } catch (err) {
+            console.error("Erreur de connexion :", err);
+            return false;
+        }
+    };
+
+    const uploadToOneDrive = async (data) => {
+        if (!accessToken) return;
+        try {
+            await fetch(ONEDRIVE_PATH, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify(data)
+            });
+            console.log("Cloud synchronisé !");
+        } catch (err) { console.error("Erreur Upload OneDrive :", err); }
+    };
+
+    const downloadFromOneDrive = async () => {
+        if (!accessToken) return;
+        try {
+            const response = await fetch(ONEDRIVE_PATH, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (response.ok) {
+                const cloudData = await response.json();
+                if (cloudData.transactions && cloudData.categories) {
+                    transactions = cloudData.transactions;
+                    categories = cloudData.categories;
+                    saveAndRender();
+                    console.log("Données récupérées depuis OneDrive.");
+                }
+            }
+        } catch (err) { console.log("Aucun fichier trouvé sur le Cloud, prêt pour premier usage."); }
+    };
+
+    // =========================================================================
+    // 3. FONCTIONS UTILITAIRES & SAUVEGARDE
     // =========================================================================
 
     const saveState = async () => {
-        // Sauvegarde LocalStorage
+        const dataExport = { transactions, categories };
+        
+        // 1. Sauvegarde LocalStorage
         localStorage.setItem('transactions', JSON.stringify(transactions));
         localStorage.setItem('categories', JSON.stringify(categories));
         localStorage.setItem('currentDate', currentDate.toISOString());
 
-        // MODIF : Tentative de sauvegarde automatique sur fichier JSON
+        // 2. Sauvegarde Cloud OneDrive
+        if (accessToken) {
+            await uploadToOneDrive(dataExport);
+        }
+
+        // 3. Sauvegarde sur fichier local (ton ancien système)
         try {
-            if (window.showSaveFilePicker) {
-                if (!fileHandle) {
-                    // Première fois : on demande à l'utilisateur de choisir/créer le fichier
-                    fileHandle = await window.showSaveFilePicker({
-                        suggestedName: 'ma_sauvegarde_budget.json',
-                        types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }]
-                    });
-                }
+            if (window.showSaveFilePicker && fileHandle) {
                 const writable = await fileHandle.createWritable();
-                const dataExport = { transactions, categories };
                 await writable.write(JSON.stringify(dataExport, null, 2));
                 await writable.close();
-                console.log("Fichier synchronisé.");
+                console.log("Fichier local synchronisé.");
             }
-        } catch (err) {
-            console.error("Sauvegarde auto annulée ou impossible :", err);
-        }
+        } catch (err) { console.error("Fichier local inaccessible :", err); }
     };
 
     const loadState = () => {
@@ -130,47 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
         saveAndRender(); 
     };
 
-    const exportBtn = document.getElementById('export-data-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            const dataExport = { transactions, categories };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataExport));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "ma_sauvegarde_budget.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        });
-    }
-
-    const importInput = document.getElementById('import-data-input');
-    const importBtn = document.getElementById('import-data-btn');
-    if (importBtn && importInput) {
-        importBtn.addEventListener('click', () => importInput.click());
-        importInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const importedData = JSON.parse(event.target.result);
-                    if (importedData.transactions && importedData.categories) {
-                        transactions = importedData.transactions;
-                        categories = importedData.categories;
-                        saveAndRender();
-                        alert("Importation réussie !");
-                    }
-                } catch (err) {
-                    alert("Erreur lors de la lecture du fichier.");
-                }
-            };
-            reader.readAsText(file);
-        });
-    }
-
     // =========================================================================
-    // 3. GESTION DES CATÉGORIES
+    // 4. GESTION DES CATÉGORIES
     // =========================================================================
 
     const renderCategories = (selectCat = null) => {
@@ -299,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
-    // 4. CALCULS ET AFFICHAGE (Soldes)
+    // 5. CALCULS ET SOLDES
     // =========================================================================
 
     const updateBalances = () => {
@@ -337,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
-    // 5. FONCTIONS DE TRANSACTION (PARTIE 2 INTÉGRÉE)
+    // 6. FONCTIONS DE TRANSACTION
     // =========================================================================
 
     const getCategoryOptionsHTML = (selectedCategory, selectedSubcategory) => {
@@ -437,8 +472,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
-    // 6. ÉVÉNEMENTS
+    // 7. ÉVÉNEMENTS
     // =========================================================================
+
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            await signIn();
+        });
+    }
 
     if (form) {
         form.addEventListener('submit', (e) => {
@@ -589,8 +630,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================================
-    // 7. INITIALISATION
+    // 8. EXPORT / IMPORT JSON
     // =========================================================================
+    const exportBtn = document.getElementById('export-data-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            const dataExport = { transactions, categories };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataExport));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ma_sauvegarde_budget.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+    }
+
+    const importInput = document.getElementById('import-data-input');
+    const importBtn = document.getElementById('import-data-btn');
+    if (importBtn && importInput) {
+        importBtn.addEventListener('click', () => importInput.click());
+        importInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (importedData.transactions && importedData.categories) {
+                        transactions = importedData.transactions;
+                        categories = importedData.categories;
+                        saveAndRender();
+                        alert("Importation réussie !");
+                    }
+                } catch (err) { alert("Erreur lors de la lecture du fichier."); }
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    const clearDataBtn = document.getElementById('clear-data-btn');
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', () => {
+            if (confirm("Voulez-vous vraiment TOUT supprimer ? Cette action est irréversible (sauf si vous avez un export JSON).")) {
+                transactions = [];
+                categories = { 'Salaire': ['N/A'], 'Loyer': ['N/A'], 'Courses': ['Alimentation'], 'Loisirs': ['Sorties'], 'N/A': ['N/A'] };
+                saveAndRender();
+            }
+        });
+    }
+
+    // =========================================================================
+    // 9. INITIALISATION
+    // =========================================================================
+    
+    // Tentative de reconnexion silencieuse MSAL
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+        try {
+            const response = await msalInstance.acquireTokenSilent({
+                scopes: ["Files.ReadWrite", "User.Read"],
+                account: accounts[0]
+            });
+            accessToken = response.accessToken;
+            updateLoginButtonUI(true);
+            await downloadFromOneDrive();
+        } catch (e) { console.log("Session expirée, reconnexion manuelle nécessaire."); }
+    }
+
     loadState();
     renderCategories();
     setDefaultDate();

@@ -9,52 +9,56 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .btn-onedrive { background-color: #0078d4; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-weight: 500; }
+        .btn-onedrive i { margin-right: 8px; }
+    </style>
 </head>
 <body>
     <div class="app-container">
-		<header>
-			<button id="login-btn" class="btn-onedrive">
-			<i class="fab fa-microsoft"></i> Connexion OneDrive
-			</button>
-            <h1>Mon Compte</h1>
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>Mon Compte</h1>
+                <button id="login-btn" class="btn-onedrive">
+                    <i class="fab fa-microsoft"></i> Connexion OneDrive
+                </button>
+            </div>
+
             <div class="balance-card">
                 <div class="balance-item validated">
                     <span class="label">Solde RÉEL Actuel (Validé)</span>
                     <span class="amount" id="real-balance">0.00 €</span>
                 </div>
-
                 <div class="balance-item">
                     <span class="label">Solde de Départ (Cumul Avant Mois)</span>
                     <span class="amount" id="initial-balance">0.00 €</span>
                 </div>
-
                 <div class="balance-item pending">
                     <span class="label">Solde ESTIMÉ (Réel + Attente)</span>
                     <span class="amount" id="current-balance">0.00 €</span>
+                    <div style="font-size: 0.8em; margin-top: 5px;">
+                        <span id="current-validated-total">Validé : 0.00 €</span> | 
+                        <span id="current-pending-total">Attente : 0.00 €</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <main>
             <div class="sidebar-container">
-                
                 <section class="category-management sidebar">
                     <h2>Gérer Catégories & Sous-catégories</h2>
                     <ul id="category-management-list" class="management-list">
                         <li style="text-align: center; color: var(--text-secondary);">Chargement...</li>
                     </ul>
                 </section>
-                
             </div>
             
             <div class="main-content">
-                
                 <section id="add-transaction">
                     <h2>Nouvelle Transaction</h2>
                     <form id="transaction-form" class="transaction-form">
-                        
                         <div id="error-message" class="error-message" style="display: none;"></div>
-
                         <div class="form-row">
                             <div class="form-group" style="flex: 1;">
                                 <label for="transaction-date">Date</label>
@@ -66,24 +70,22 @@
                                 <datalist id="descriptions-list"></datalist>
                             </div>
                         </div>
-
                         <div class="form-row">
                             <div class="form-group category-group">
                                 <label for="transaction-category">Catégorie</label>
                                 <select id="transaction-category" required>
                                     <option value="" disabled selected>-- Choisir Catégorie --</option>
                                 </select>
-                                <input type="text" id="new-category-name" placeholder="Nouvelle Catégorie (Entrée pour valider)" style="display: none;">
+                                <input type="text" id="new-category-name" placeholder="Nouvelle Catégorie" style="display: none;">
                             </div>
                             <div class="form-group subcategory-group">
                                 <label for="transaction-subcategory">Sous-catégorie</label>
                                 <select id="transaction-subcategory" required disabled>
                                     <option value="">-- Choisir Sous-catégorie --</option>
                                 </select>
-                                <input type="text" id="new-subcategory-name" placeholder="Nouvelle Sous-catégorie (Entrée pour valider)" style="display: none;">
+                                <input type="text" id="new-subcategory-name" placeholder="Nouvelle Sous-catégorie" style="display: none;">
                             </div>
                         </div>
-                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="transaction-amount">Montant (€)</label>
@@ -97,21 +99,16 @@
                                 </select>
                             </div>
                         </div>
-                        
                         <div class="form-group recurrence-group">
                             <label for="is-recurring">
-                                <input type="checkbox" id="is-recurring">
-                                Dépense récurrente ?
+                                <input type="checkbox" id="is-recurring"> Dépense récurrente ?
                             </label>
-                            
                             <select id="recurrence-type" disabled>
                                 <option value="">-- Fréquence --</option>
                                 <option value="monthly">Mensuelle</option>
                                 <option value="yearly">Annuelle</option>
                             </select>
-
-                            </div>
-                        
+                        </div>
                         <button type="submit" class="btn-primary">Ajouter la Transaction</button>
                     </form>
                 </section>
@@ -124,34 +121,30 @@
                             <button id="filter-pending"><i class="fas fa-hourglass-half"></i> En attente</button>
                         </div>
                     </div>
-
                     <div class="month-selector">
                         <button id="prev-month-btn" title="Mois précédent"><i class="fas fa-chevron-left"></i></button>
-                        <span id="month-year-display">Décembre 2025</span>
+                        <span id="month-year-display">...</span>
                         <button id="next-month-btn" title="Mois suivant"><i class="fas fa-chevron-right"></i></button>
                     </div>
-
-                    <ul id="transaction-list">
-                    </ul>
+                    <ul id="transaction-list"></ul>
                 </section>
                 
                 <section class="data-management-section">
-                    <button id="clear-data-btn" class="btn-danger" title="Supprime toutes les transactions et catégories">
+                    <button id="clear-data-btn" class="btn-danger">
                         <i class="fas fa-trash-alt"></i> Vider les données
                     </button>
-                    <button id="export-data-btn" class="btn-secondary" title="Télécharge les données dans un fichier">
-                        <i class="fas fa-download"></i> Exporter les données
+                    <button id="export-data-btn" class="btn-secondary">
+                        <i class="fas fa-download"></i> Exporter JSON
                     </button>
                     <input type="file" id="import-data-input" accept=".json" style="display: none;">
-                    <button id="import-data-btn" class="btn-secondary" title="Charge les données à partir d'un fichier">
-                        <i class="fas fa-upload"></i> Importer les données
+                    <button id="import-data-btn" class="btn-secondary">
+                        <i class="fas fa-upload"></i> Importer JSON
                     </button>
                 </section>
-                
             </div>
         </main>
     </div>
-	<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
