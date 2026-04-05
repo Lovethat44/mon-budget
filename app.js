@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================================
     const msalConfig = {
         auth: {
-            clientId: "TON_ID_CLIENT_ICI", // <--- REMPLACE PAR TON ID CLIENT AZURE
+            clientId: "ceb62a81-48b4-4808-ad87-05dab310ae3b", // <--- REMPLACE PAR TON ID CLIENT AZURE
             authority: "https://login.microsoftonline.com/common",
             redirectUri: "https://lovethat44.github.io/mon-budget/",
         },
