@@ -681,31 +681,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // =========================================================================
-    // 9. INITIALISATION
+    // 9. INITIALISATION (VERSION CORRIGÉE)
     // =========================================================================
     
-    // Tentative de reconnexion silencieuse MSAL
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-        try {
-            const response = await msalInstance.acquireTokenSilent({
-                scopes: ["Files.ReadWrite", "User.Read"],
-                account: accounts[0]
-            });
-            accessToken = response.accessToken;
-            updateLoginButtonUI(true);
-            await downloadFromOneDrive();
-        } catch (e) { console.log("Session expirée, reconnexion manuelle nécessaire."); }
-    }
-
+    // 1. On affiche d'abord les données locales (immédiat)
     loadState();
     renderCategories();
     setDefaultDate();
-    saveAndRender();
+    saveAndRender(); // Affiche la liste et les soldes basés sur le local
 
+    // 2. On configure l'interface par défaut
     if (recurrenceTypeSelect) recurrenceTypeSelect.disabled = true;
     if (newCategoryInput) newCategoryInput.style.display = 'none';
     if (newSubcategoryInput) newSubcategoryInput.style.display = 'none';
     if (subcategorySelect) subcategorySelect.disabled = true;
+
+    // 3. Tentative de reconnexion silencieuse MSAL et Synchro Cloud
+    const initCloudSync = async () => {
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+            try {
+                const response = await msalInstance.acquireTokenSilent({
+                    scopes: ["Files.ReadWrite", "User.Read"],
+                    account: accounts[0]
+                });
+                accessToken = response.accessToken;
+                updateLoginButtonUI(true);
+                
+                // IMPORTANT : On télécharge les données OneDrive 
+                // qui vont écraser le local si le fichier existe.
+                await downloadFromOneDrive();
+                
+                console.log("Synchronisation Cloud réussie au démarrage.");
+            } catch (e) { 
+                console.log("Session expirée, reconnexion manuelle nécessaire via le bouton."); 
+            }
+        }
+    };
+
+    // On lance la vérification Cloud
+    initCloudSync();
 
 });
