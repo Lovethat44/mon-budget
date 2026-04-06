@@ -1,19 +1,19 @@
 :root {
     /* --- COULEURS THÈME SOMBRE --- */
-    --primary-color: #55b5ff; /* Bleu plus clair pour les actions principales */
-    --secondary-color: #9fa4a8; /* Gris clair pour les actions secondaires */
-    --success-color: #4CAF50; /* Vert pour les revenus/positifs (légèrement ajusté) */
-    --danger-color: #ff6b6b; /* Rouge clair pour les dépenses/négatifs */
-    --warning-color: #ffeb3b; /* Jaune pour l'attente */
-    --background-color: #1a1a2e; /* Arrière-plan général très sombre */
-    --card-background: #272744; /* Fond des cartes et sections plus clair que le fond */
-    --text-primary: #f8f8f8; /* Texte principal clair */
-    --text-secondary: #b0b0b0; /* Texte secondaire/labels gris clair */
-    --border-color: #3f3f61; /* Bordure sombre */
-    --shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Ombre plus prononcée sur fond sombre */
+    --primary-color: #55b5ff;
+    --secondary-color: #9fa4a8;
+    --success-color: #4CAF50;
+    --danger-color: #ff6b6b;
+    --warning-color: #ffeb3b;
+    --background-color: #1a1a2e;
+    --card-background: #272744;
+    --text-primary: #f8f8f8;
+    --text-secondary: #b0b0b0;
+    --border-color: #3f3f61;
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     /* --- COULEUR SPÉCIFIQUE : LIGNE VALIDÉE (POINTÉE) --- */
-    --validated-line-color: #4CAF50; /* Couleur pour les lignes validées (Vert) */
-    --validated-background: #4caf5015; /* NOUVEAU: Fond très léger pour la ligne validée */
+    --validated-line-color: #4CAF50;
+    --validated-background: #4caf5015;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -27,6 +27,7 @@ body {
     background-color: var(--background-color);
     color: var(--text-primary);
     line-height: 1.6;
+    -webkit-tap-highlight-color: transparent; /* Supprime le flash bleu au clic sur mobile */
 }
 
 h1, h2 {
@@ -61,13 +62,13 @@ main {
 }
 
 .sidebar-container {
-    flex: 0 0 300px; /* Largeur fixe pour la sidebar */
-    display: flex; /* Permet d'empiler les sections de la sidebar */
+    flex: 0 0 300px;
+    display: flex;
     flex-direction: column;
 }
 
 .main-content {
-    flex: 1; /* Prend l'espace restant */
+    flex: 1;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -110,13 +111,8 @@ main {
     color: var(--text-primary);
 }
 
-.balance-item.validated .amount {
-    color: var(--success-color); /* Vert */
-}
-
-.balance-item.pending .amount {
-    color: var(--warning-color); /* Jaune */
-}
+.balance-item.validated .amount { color: var(--success-color); }
+.balance-item.pending .amount { color: var(--warning-color); }
 
 /* ---------------------------------------------------------------------- */
 /* 4. SECTIONS & SIDEBARS */
@@ -130,23 +126,12 @@ section {
     margin-bottom: 30px;
 }
 
-/* Styles spécifiques Sidebar */
 .sidebar {
     padding: 15px;
-    margin-bottom: 20px;
-    /* Reset pour la sidebar car la section globale a déjà un margin-bottom */
     margin-bottom: 0 !important;
 }
 
-/* 🟢 MODIFICATION : Seule la catégorie management est listée 🟢 */
-.category-management {
-    /* L'expansion est contrôlée par le contenu, plus besoin de flex-grow: 1 */
-    flex-grow: 0; 
-}
-
-/* Suppression des sélecteurs inutiles pour les sections retirées */
-/* .recurring-transactions, #monthly-totals-section { flex-grow: 1; } a été retiré */
-
+.category-management { flex-grow: 0; }
 
 .management-list, .totals-list {
     list-style: none;
@@ -154,7 +139,6 @@ section {
     margin-top: 10px;
 }
 
-/* Styles pour les éléments de liste de gestion */
 .management-list li, .totals-list li {
     padding: 8px 0;
     border-bottom: 1px dashed var(--border-color);
@@ -164,38 +148,16 @@ section {
     align-items: center;
 }
 
-.management-list li:last-child, .totals-list li:last-child {
-    border-bottom: none;
-}
-
-/* Styles pour les montants dans le résumé mensuel */
-.totals-list .amount-total {
-    font-weight: 600;
-    /* Les classes .credit et .debit seront ajoutées par JS */
-}
-
+.management-list li:last-child, .totals-list li:last-child { border-bottom: none; }
+.totals-list .amount-total { font-weight: 600; }
 
 /* ---------------------------------------------------------------------- */
 /* 5. FORMULAIRE DE TRANSACTION */
 /* ---------------------------------------------------------------------- */
 
-.transaction-form {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-
+.transaction-form { display: flex; flex-direction: column; }
+.form-row { display: flex; gap: 20px; margin-bottom: 15px; }
+.form-group { display: flex; flex-direction: column; flex: 1; }
 .form-group label {
     font-size: 0.9em;
     font-weight: 500;
@@ -203,41 +165,27 @@ section {
     color: var(--text-secondary);
 }
 
-/* Styles des champs de saisie */
 input[type="text"], input[type="date"], input[type="number"], select {
-    padding: 10px;
+    padding: 12px;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 1em;
-    background-color: var(--background-color); /* Fond de champ plus sombre */
-    color: var(--text-primary); /* Texte de champ clair */
-    transition: border-color 0.3s, background-color 0.3s;
+    border-radius: 8px;
+    font-size: 16px; /* Évite le zoom auto sur iPhone */
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    transition: all 0.3s;
 }
 
-input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus {
+input:focus, select:focus {
     border-color: var(--primary-color);
     outline: none;
     background-color: var(--card-background);
 }
 
-/* Groupe de récurrence */
 .recurrence-group {
-    flex-direction: row;
+    display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
-    flex: unset !important; /* Pour ne pas prendre tout l'espace */
-}
-
-.recurrence-group label {
-    margin-bottom: 0;
-    flex-shrink: 0;
-    cursor: pointer;
-}
-
-.recurrence-group input[type="checkbox"] {
-    margin-right: 5px;
-    width: auto; /* Annule le style d'input général */
 }
 
 /* ---------------------------------------------------------------------- */
@@ -245,367 +193,202 @@ input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, 
 /* ---------------------------------------------------------------------- */
 
 .btn-primary, .btn-secondary, .btn-danger {
-    padding: 10px 15px;
+    padding: 12px 15px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.3s, opacity 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    white-space: nowrap; /* Empêche le texte de se briser */
+    transition: opacity 0.2s;
 }
 
-.btn-primary {
-    background-color: var(--primary-color);
-    color: var(--card-background); /* Texte de bouton clair */
-    width: 100%;
-    margin-top: 10px;
-}
-
-.btn-primary:hover {
-    background-color: #378ac9; /* Ajustement du hover */
-}
-
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: var(--card-background);
-}
-
-.btn-secondary:hover {
-    background-color: #8c9094;
-}
-
-.btn-danger {
-    background-color: var(--danger-color);
-    color: var(--card-background);
-}
-
-.btn-danger:hover {
-    background-color: #cc4f4f;
-}
+.btn-primary { background-color: var(--primary-color); color: #1a1a2e; width: 100%; margin-top: 10px; }
+.btn-secondary { background-color: var(--secondary-color); color: #1a1a2e; }
+.btn-danger { background-color: var(--danger-color); color: #1a1a2e; }
 
 /* ---------------------------------------------------------------------- */
 /* 7. LISTE DES TRANSACTIONS */
 /* ---------------------------------------------------------------------- */
 
-.transaction-list {
-    padding-bottom: 0; /* Pour ne pas avoir trop d'espace sous la liste UL */
-}
-
-.list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.filters button {
-    background: none;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-left: 10px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.filters button.active, .filters button:hover {
-    background-color: var(--primary-color);
-    color: var(--card-background);
-    border-color: var(--primary-color);
-}
-
-/* Sélecteur de mois */
 .month-selector {
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 15px 0;
-    font-size: 1.2em;
-    font-weight: 500;
+    font-size: 1.1em;
 }
 
 .month-selector button {
     background: none;
     border: none;
-    cursor: pointer;
-    font-size: 1.2em;
     color: var(--primary-color);
-    padding: 5px 10px;
-    transition: opacity 0.2s;
+    font-size: 1.5em;
+    padding: 0 20px;
+    cursor: pointer;
 }
 
-.month-selector button:hover {
-    opacity: 0.8;
-}
-
-#month-year {
-    margin: 0 15px;
-    color: var(--text-primary);
-    min-width: 150px; /* Assure un minimum de largeur pour le nom du mois */
-    text-align: center;
-}
-
-/* Résumé des totaux du mois */
 .transaction-summary {
     display: flex;
     justify-content: space-around;
-    padding: 10px;
-    background-color: var(--card-background); /* Utilise le fond de carte pour le contraste */
+    padding: 12px;
+    background-color: var(--background-color);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 8px;
     margin-bottom: 15px;
-    font-weight: 500;
-    font-size: 0.95em;
+    font-size: 0.9em;
 }
 
-.validated-total {
-    color: var(--success-color);
-}
+#transaction-list { list-style: none; padding: 0; }
 
-.pending-total {
-    color: var(--warning-color);
-}
-
-/* Liste UL */
-#transaction-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-/* Élément LI (transaction) */
 #transaction-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
+    padding: 12px 10px;
     border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s;
 }
 
-#transaction-list li:last-child {
-    border-bottom: none;
-}
-
-#transaction-list li:hover {
-    background-color: #3f3f6120; /* Léger hover sur fond sombre */
-}
-
-/* 🟢 MODIFICATIONS CLÉS : LIGNE VALIDÉE (pointée) EN VERT SUBTIL 🟢 */
 #transaction-list li.validated {
-    /* Fond de couleur sur toute la ligne */
     background-color: var(--validated-background);
-    /* Ligne pointée à gauche (conservation) */
     border-left: 4px solid var(--validated-line-color);
-    padding-left: 8px; 
-    border-bottom: 1px solid var(--border-color); 
 }
 
-/* Annule le gras précédemment appliqué */
-#transaction-list li.validated .t-info .t-desc {
-    font-weight: 500; 
-}
-
-.t-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    /* Ajustement de la marge suite au padding-left de li.validated */
-    margin-left: 0; 
-}
-
-.t-desc {
-    font-weight: 500;
-}
-
-.t-date {
-    font-size: 0.85em;
-    color: var(--text-secondary);
-}
-
-.t-actions {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-shrink: 0;
-    margin-left: 10px;
-}
+.t-info { flex-grow: 1; }
+.t-desc { font-weight: 500; display: block; }
+.t-date { font-size: 0.8em; color: var(--text-secondary); }
 
 .t-amount {
     font-weight: 700;
     font-size: 1.1em;
+    min-width: 80px;
     text-align: right;
-    min-width: 90px;
-    flex-shrink: 0;
-    margin-right: 15px;
+    margin: 0 10px;
 }
 
-.t-amount.credit {
-    color: var(--success-color);
-}
+.t-amount.credit { color: var(--success-color); }
+.t-amount.debit { color: var(--danger-color); }
 
-.t-amount.debit {
-    color: var(--danger-color);
-}
+.t-actions { display: flex; gap: 10px; }
 
-/* Boutons d'action */
-.t-actions button {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 0.9em;
-    padding: 5px;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.t-actions button:hover {
-    color: var(--primary-color);
-    background-color: var(--border-color);
-}
-
-
-/* 🟢 MODIFICATION CLÉ : Le Bouton de Validation est plus voyant 🟢 */
 .btn-validate {
     padding: 8px !important;
-    font-size: 1.1em !important; 
-    /* Style de base: En attente */
+    border: 2px solid var(--validated-line-color) !important;
     color: var(--validated-line-color);
-    border: 2px solid var(--validated-line-color);
-    background-color: var(--card-background); /* Contraste sur la ligne non validée */
+    background: none;
+    border-radius: 6px;
 }
 
-.btn-validate:hover {
-    color: var(--card-background);
-    background-color: var(--validated-line-color);
-    border-color: var(--validated-line-color);
-}
-
-/* Style lorsque la ligne est déjà VALIDÉE */
 #transaction-list li.validated .btn-validate {
-    /* Rendu : Plein (validé) */
     background-color: var(--validated-line-color);
-    color: white; 
-    border: 2px solid var(--validated-line-color);
-}
-
-#transaction-list li.validated .btn-validate:hover {
-    /* Rendu : Plein clair au survol */
-    background-color: #72cf75; 
+    color: white;
 }
 
 /* ---------------------------------------------------------------------- */
-/* 8. GESTION DES DONNÉES ET MESSAGES */
+/* 8. GESTION DES DONNÉES */
 /* ---------------------------------------------------------------------- */
 
 .data-management-section {
     display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    padding: 15px 20px; 
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
     background-color: var(--card-background);
     border-radius: 12px;
-    box-shadow: var(--shadow);
     margin-bottom: 30px;
 }
 
-.error-message {
-    padding: 10px;
-    margin-bottom: 15px;
-    background-color: #442a2e; 
-    color: var(--danger-color);
-    border: 1px solid #663d41;
-    border-radius: 6px;
-    font-weight: 500;
-}
-
 /* ---------------------------------------------------------------------- */
-/* 9. RESPONSIVENESS */
+/* 9. RESPONSIVE MOBILE OPTIMISÉ (MAX 768px) */
 /* ---------------------------------------------------------------------- */
 
-@media (max-width: 1000px) {
-    .app-container {
-        padding: 10px;
-    }
+@media (max-width: 768px) {
+    .app-container { padding: 10px; }
     
-    main {
-        flex-direction: column;
-    }
+    main { flex-direction: column; gap: 15px; }
 
-    .sidebar-container {
-        flex: auto;
-    }
-    
-    /* Cartes de solde */
+    /* Solde sur deux lignes pour mobile */
     .balance-card {
-        flex-wrap: wrap;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding: 15px;
     }
 
     .balance-item {
-        flex: 1 1 100%;
         border-right: none;
-        padding: 10px 0;
         border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
     }
-    
+
     .balance-item:last-child {
+        grid-column: span 2;
         border-bottom: none;
-    }
-    
-    /* Formulaire */
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-    }
-    
-    /* Boutons de gestion des données */
-    .data-management-section {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
+        padding-top: 10px;
     }
 
-    .data-management-section button {
-        width: 100%;
-    }
+    .balance-item .amount { font-size: 1.4em; }
 
-    /* Liste des transactions */
+    /* Formulaire en colonne pleine */
+    .form-row { flex-direction: column; gap: 10px; }
+
+    /* Transformation de la liste en CARTES */
     #transaction-list li {
-        flex-wrap: wrap;
-        padding: 10px 0;
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;
+        padding: 15px;
+        margin-bottom: 10px;
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
     }
-    
-    .t-info {
-        order: 1; 
-        flex-basis: 70%;
-    }
+
+    .t-info { margin-bottom: 10px; width: 100%; }
+    .t-desc { font-size: 1.1em; }
 
     .t-amount {
-        order: 2; 
-        min-width: auto;
-        font-size: 1.0em;
-        margin-right: 0;
-        margin-left: auto;
-        padding-top: 5px;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.2em;
+        margin: 0;
     }
 
     .t-actions {
-        order: 3; 
-        flex-basis: 100%;
-        justify-content: flex-end;
-        padding-top: 5px;
+        width: 100%;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-color);
+        padding-top: 10px;
+        margin-top: 5px;
+    }
+
+    .t-actions button {
+        flex: 1;
+        justify-content: center;
+        padding: 10px !important;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Boutons de bas de page */
+    .data-management-section {
+        flex-direction: column;
     }
     
-    /* Correction pour la ligne pointée en responsive */
-    #transaction-list li.validated {
-        padding-left: 8px; 
+    .data-management-section button { width: 100%; }
+
+    /* Filtres plus gros pour les doigts */
+    .filters {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        gap: 5px;
+    }
+    
+    .filters button {
+        flex: 1;
+        white-space: nowrap;
+        padding: 10px;
     }
 }
